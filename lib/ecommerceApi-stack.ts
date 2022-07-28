@@ -34,7 +34,8 @@ export class ECommerceApiStack extends cdk.Stack {
         })
 
         const productsFetchIntegration = new apigateway.LambdaIntegration(props.productsFetchHandler)
-
+        
+        //"/products"
         const productsResourcce = api.root.addResource("products")
         productsResourcce.addMethod("GET", productsFetchIntegration)
 
