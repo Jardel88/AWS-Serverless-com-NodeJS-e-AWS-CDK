@@ -38,8 +38,14 @@ export class ProductsAppStack extends cdk.Stack {
                 bundling: {
                     minify: true,
                     sourceMap: false
+                },
+                //Variavel de ambiente para obter o nome da tabela
+                environment: {
+                    PRODUCTS_DDB: this.productsDdb.tableName
                 }
              })
+
+             this.productsDdb.grantReadData(this.productsFetchHandler)
 
     }
 }
