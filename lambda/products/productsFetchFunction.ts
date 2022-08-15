@@ -1,6 +1,6 @@
 import { EventSourceMapping } from "aws-cdk-lib/aws-lambda";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-import { ProductRepository } from "/opt/nodejs/productLayer";
+import { ProductRepository } from "/opt/nodejs/productsLayer";
 import { DynamoDB } from "aws-sdk";
 import * as AWSXRay from "aws-xray-sdk"
 
