@@ -30,21 +30,76 @@ export async function handler(event: APIGatewayProxyEvent, context: Context): Pr
             if (email) {
                 if (orderId) {
                     //Get one order from user
+                    try {
+                        const order = await orderRepository.getOrder(email, orderId)
+                        return {
+                        statusCode: 200,
+                        body: JSON.stringify(convertToOrderResponse(order))
+                        }
+                    } catch (error) {
+                        console.log((<Error>error).message)
+                        return {
+                            statusCode: 404,
+                            body: (<Error>error).message
+                        }
+                    }
+                    
                 } else {
                     //Get all orders from user
+                    const orders = await orderRepository.getOrdersByEmail(email)
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify(orders.map(convertToOrderResponse))
+                    }
                 }
             }
         } else {
             //Get all orders
+            const orders = await orderRepository.getAllOrders()
+            return {
+                statusCode: 200,
+                body: JSON.stringify(orders.map(convertToOrderResponse))
+            }
         }
 
     } else if (method === 'POST') {
         console.log('POST /orders')
+        const orderRequest = JSON.parse(event.body!) as OrderRequest
+        const products = await productRepository.getProductsByIds(orderRequest.productIds)
+        if (products.length === orderRequest.productIds.length) {
+            const order = buildOrder(orderRequest, products)
+            const orderCreated = await orderRepository.createOrder(order)
+
+            return {
+                statusCode: 201,
+                body: JSON.stringify(convertToOrderResponse(orderCreated))
+            }
+        } else {
+            return {
+                statusCode: 404,
+                body: "Some product was not found"
+            }
+        }
 
     } else if (method === 'DELETE') {
         console.log('DELETE /orders')
-        const email = event.queryStringParameters!.email
-        const orderId = event.queryStringParameters!.orderId
+        const email = event.queryStringParameters!.email!
+        const orderId = event.queryStringParameters!.orderId!
+
+        try {
+            const orderDelete = await orderRepository.deleteOrder(email, orderId)
+            return {
+            statusCode: 200,
+            body: JSON.stringify(convertToOrderResponse(orderDelete))
+            }
+        } catch (error) {
+            console.log((<Error>error).message)
+            return {
+                statusCode: 404,
+                body: (<Error>error).message
+            }
+        }
+        
     }
     
     return {
