@@ -5,6 +5,7 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb"
 import * as ssm from "aws-cdk-lib/aws-ssm"
 import * as sns from "aws-cdk-lib/aws-sns"
 import * as subs from "aws-cdk-lib/aws-sns-subscriptions"
+import * as iam from "aws-cdk-lib/aws-iam"
 import { Construct } from 'constructs'
 
 interface OrdersAppStackProps extends cdk.StackProps {
@@ -104,5 +105,17 @@ export class OrdersAppStack extends cdk.Stack {
          insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0
       })
       ordersTopic.addSubscription(new subs.LambdaSubscription(orderEventsHandler))
+
+      const eventsDdbPolicy = new iam.PolicyStatement({
+         effect: iam.Effect.ALLOW,
+         actions: ["dynamodb:PutItem"],
+         resources: [props.eventsDdb.tableArn],
+         conditions: {
+            ['ForAllValues:StringLike']: {
+               'dynamodb:LeadingKeys': ['#order_*']
+            }
+         }
+      })
+      orderEventsHandler.addToRolePolicy(eventsDdbPolicy)
    }
 }
