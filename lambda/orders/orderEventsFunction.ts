@@ -7,7 +7,7 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 
 AWSXRay.captureAWS(require("aws-sdk"))
 
-const eventsDdb = process.env.EVENTSDDB!
+const eventsDdb = process.env.EVENTS_DDB!
 
 const ddbClient = new DynamoDB.DocumentClient()
 const orderEventsRepository = new OrderEventRepository(ddbClient, eventsDdb)
