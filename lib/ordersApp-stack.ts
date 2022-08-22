@@ -64,7 +64,7 @@ export class OrdersAppStack extends cdk.Stack {
       const productsLayer = lambda.LayerVersion
          .fromLayerVersionArn(this, "ProductsLayerVersionArn", productsLayerArn)
 
-      const ordersTopic = new sns.Topic(this, "OrdersFunction", {
+      const ordersTopic = new sns.Topic(this, "OrderEventsTopic", {
          displayName: "Order events topic",
          topicName: "order-events"
       })
@@ -92,7 +92,7 @@ export class OrdersAppStack extends cdk.Stack {
       ordersDdb.grantReadWriteData(this.ordersHandler)
       props.productsDdb.grantReadData(this.ordersHandler)
       ordersTopic.grantPublish(this.ordersHandler)
-
+      
       const orderEventsHandler = new lambdaNodeJS.NodejsFunction(this, "OrderEventsFunction", {
          functionName: "OrderEventsFunction",
          entry: "lambda/orders/orderEventsFunction.ts",
