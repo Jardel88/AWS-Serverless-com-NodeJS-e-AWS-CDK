@@ -183,11 +183,17 @@ export class OrdersAppStack extends cdk.Stack {
          tracing: lambda.Tracing.ACTIVE,
          insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0
       })
-      orderEmailsHandler.addEventSource(new lambdaEventSource.SqsEventSource(orderEventsQueue, {
+      orderEmailsHandler.addEventSource(new lambdaEventSource.SqsEventSource(orderEventsQueue/*, {
          batchSize: 5,
          enabled: true,
          maxBatchingWindow: cdk.Duration.minutes(1)
-      }))
+      }*/))
       orderEventsQueue.grantConsumeMessages(orderEmailsHandler)
+      const orderEmailSesPolicy = new iam.PolicyStatement({
+         effect: iam.Effect.ALLOW,
+         actions: ["ses:SendEmail", "ses:SendRawEmail"],
+         resources: ["*"]
+      })
+      orderEmailsHandler.addToRolePolicy(orderEmailSesPolicy)
    }
 }
