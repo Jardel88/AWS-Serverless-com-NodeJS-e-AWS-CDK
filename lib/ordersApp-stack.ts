@@ -206,11 +206,11 @@ export class OrdersAppStack extends cdk.Stack {
          bundling: {
             minify: true,
             sourceMap: false               
-         }, 
+         },            
          environment: {
             EVENTS_DDB: props.eventsDdb.tableName
          },
-         layers: [orderEventsRepositoryLayer],           
+         layers: [orderEventsRepositoryLayer],
          tracing: lambda.Tracing.ACTIVE,
          insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0
       })
@@ -219,6 +219,6 @@ export class OrdersAppStack extends cdk.Stack {
          actions:['dynamodb:Query'],
          resources: [`${props.eventsDdb.tableArn}/index/emailIndex`]
       })
-      this.orderEventsFetchHandler.addToRolePolicy(eventsDdbPolicy)
+      this.orderEventsFetchHandler.addToRolePolicy(eventsFetchDdbPolicy)
    }
 }
