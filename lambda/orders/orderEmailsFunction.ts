@@ -39,7 +39,7 @@ function sendOrderEmail(body: SNSMessage) {
                 Data: "Recebemos seu pedido!"
             }
         },
-        Source: "emailOrigem",
-        ReplyToAddresses: ['emailOrigem']
+        Source: "jardelsilvagomes88@hotmail.com",
+        ReplyToAddresses: ['jardelsilvagomes88@hotmail.com']
     }).promise()
 }
