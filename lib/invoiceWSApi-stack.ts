@@ -8,6 +8,7 @@ import * as s3 from "aws-cdk-lib/aws-s3"
 import * as iam from "aws-cdk-lib/aws-iam"
 import * as s3n from "aws-cdk-lib/aws-s3-notifications"
 import { Construct } from "constructs"
+import { Action } from "aws-cdk-lib/aws-codepipeline"
 
 export class InvoiceWSApiStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps){
@@ -93,6 +94,42 @@ export class InvoiceWSApiStack extends cdk.Stack {
         })
 
         //Invoice URL handler
+        const getUrlHandler = new lambdaNodeJS.NodejsFunction(this, "InvoiceGetUrlFunction", {
+            functionName: "InvoiceGetUrlFunction",
+            entry: "lambda/invoices/invoiceGetUrlFunction.ts",
+            handler: "handler",
+            memorySize: 128,
+            timeout: cdk.Duration.seconds(2),
+            bundling: {
+               minify: true,
+               sourceMap: false               
+            },            
+            tracing: lambda.Tracing.ACTIVE,
+            environment: {
+                INVOICE_DDB: invoicesDdb.tableName,
+                BUCKET_NAME: bucket.bucketName,
+                INVOICE_WSAPI_ENDPOINT: wsApiEndpoint
+            }
+         })
+         const invoicesDdbWriteTransactionPolicy = new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ['dynamodb:PutItem'],
+            resources: [invoicesDdb.tableArn],
+            conditions: {
+                ['ForAllValues:StringLikes']: {
+                    'dynamodb:LeadingKeys': ['#transaction']
+                }
+            }
+         })
+         const invoicesBucketPutObjectPolicy = new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ['s3:PutObject'],
+            resources: [`${bucket.bucketArn}/*`]
+         })
+
+         getUrlHandler.addToRolePolicy(invoicesDdbWriteTransactionPolicy)
+         getUrlHandler.addToRolePolicy(invoicesBucketPutObjectPolicy)
+         webSocketApi.grantManageConnections(getUrlHandler)
 
         //Invoice import handler
 
