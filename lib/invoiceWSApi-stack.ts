@@ -32,10 +32,44 @@ export class InvoiceWSApiStack extends cdk.Stack {
         })
 
         //Invoice bucket
+        const bucket = new s3.Bucket(this, "InvoiceBucket", {
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            autoDeleteObjects: true,
+            lifecycleRules: [
+                {
+                    enabled: true,
+                    expiration: cdk.Duration.days(1)
+                }
+            ]
+        })
 
         //WebSocket connection hadler
+        const connectionHandler = new lambdaNodeJS.NodejsFunction(this, "InvoiceConnectionFunction", {
+            functionName: "InvoiceConnectionFunction",
+            entry: "lambda/invoices/invoiceConnectionFunction.ts",
+            handler: "handler",
+            memorySize: 128,
+            timeout: cdk.Duration.seconds(2),
+            bundling: {
+               minify: true,
+               sourceMap: false               
+            },            
+            tracing: lambda.Tracing.ACTIVE,
+         })
 
         //WebSocket disconnection hadler
+        const disconnectionHandler = new lambdaNodeJS.NodejsFunction(this, "InvoiceDisconnectionFunction", {
+            functionName: "InvoiceDisconnectionFunction",
+            entry: "lambda/invoices/invoiceDisconnectionFunction.ts",
+            handler: "handler",
+            memorySize: 128,
+            timeout: cdk.Duration.seconds(2),
+            bundling: {
+               minify: true,
+               sourceMap: false               
+            },            
+            tracing: lambda.Tracing.ACTIVE,
+         })
 
         //WebSocket API
 
