@@ -18,7 +18,7 @@ export interface InvoiceTransaction {
     expiresIn: number;
     connectionId: string;
     endpoint: string;
-    transactionStatus: InvoiceTransactionStatus
+    transactionStatus: InvoiceTransactionStatus;
 }
 
 export class InvoiceTransactionRepository {

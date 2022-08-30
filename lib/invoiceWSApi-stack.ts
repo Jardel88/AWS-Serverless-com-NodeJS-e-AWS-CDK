@@ -136,7 +136,7 @@ export class InvoiceWSApiStack extends cdk.Stack {
             actions: ['dynamodb:PutItem'],
             resources: [invoicesDdb.tableArn],
             conditions: {
-                ['ForAllValues:StringLikes']: {
+                ['ForAllValues:StringLike']: {
                     'dynamodb:LeadingKeys': ['#transaction']
                 }
             }
@@ -204,7 +204,7 @@ export class InvoiceWSApiStack extends cdk.Stack {
             actions: ['dynamodb:UpdateItem', 'dynamodb:GetItem'],
             resources: [invoicesDdb.tableArn],
             conditions: {
-                ['ForAllValues:StringLikes']: {
+                ['ForAllValues:StringLike']: {
                     'dynamodb:LeadingKeys': ['#transaction']
                 }
             }

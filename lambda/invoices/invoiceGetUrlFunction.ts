@@ -2,13 +2,14 @@ import { ApiGatewayManagementApi, DynamoDB, S3 } from "aws-sdk";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import * as AWSXRay from "aws-xray-sdk"
 import { v4 as uuid } from "uuid"
-import { InvoiceTransactionStatus, InvoiceTransactionRepository } from './layers/invoiceTransaction/nodejs/invoiceTransaction';
+import { InvoiceTransactionStatus, InvoiceTransactionRepository } from '/opt/nodejs/invoiceTransaction'
+import { InvoiceWSService } from '/opt/nodejs/invoiceWSConnection'
 
 AWSXRay.captureAWS(require('aws-sdk'))
 
 const invoicesDdb = process.env.INVOICE_DDB!
 const bucketName = process.env.BUCKET_NAME!
-const invoicesWsApiEndpoint = process.env.NVOICE_WSAPI_ENDPOINT!.substring(6)
+const invoicesWsApiEndpoint = process.env.INVOICE_WSAPI_ENDPOINT!.substring(6)
 
 const s3Client = new S3()
 const ddbClient = new DynamoDB.DocumentClient()
@@ -17,6 +18,7 @@ const apigwManagementApi = new ApiGatewayManagementApi({
 })
 
 const invoiceTransactionRepository = new InvoiceTransactionRepository(ddbClient, invoicesDdb)
+const invoiceWSService = new InvoiceWSService(apigwManagementApi)
 
 export async function handler (event: APIGatewayProxyEvent, context: Context): 
     Promise<APIGatewayProxyResult> {
@@ -53,6 +55,12 @@ export async function handler (event: APIGatewayProxyEvent, context: Context):
     })
 
     //Send URL back to WS connected client
+    const postData = JSON.stringify({
+        url: signedUrlPut,
+        expires: expires,
+        transactionId: key
+    })
+    await invoiceWSService.sendData(connectionId, postData)
 
     return {
         statusCode: 200,
