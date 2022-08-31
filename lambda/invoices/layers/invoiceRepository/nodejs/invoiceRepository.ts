@@ -3,7 +3,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 export interface InvoiceFile {
     customerName: string;
     invoiceNumber: string;
-    totalValueNumber: number;
+    totalValue: number;
     productId: string;
     quantity: number;
 }
